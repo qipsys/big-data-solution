@@ -2,8 +2,11 @@ FROM debian:9
 
 #Moving in PySpark/Hadoop test to the container(Write/Reading dataframe)
 COPY test.py /
-
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN rm /etc/apt/sources.list
+RUN echo "deb http://archive.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list.d/stretch.list
+RUN echo "deb http://archive.debian.org/debian stretch main" >> /etc/apt/sources.list.d/stretch.list
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -qq -y --no-install-recommends \
       openjdk-8-jdk \
       net-tools \
       curl \
@@ -22,7 +25,7 @@ RUN tar xzf Python-3.8.4.tgz
 RUN cd Python-3.8.4 && ./configure --enable-optimizations && make -j 8 && make altinstall
 
 RUN apt-get install -y python3-pip
-RUN pip3 install --no-cache-dir --upgrade pyspark
+RUN pip3 install --no-cache-dir py4j pyspark
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
