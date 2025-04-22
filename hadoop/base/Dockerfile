@@ -20,13 +20,15 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y make build-essential libssl-dev zlib1g-dev \
        libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
        libncurses5-dev libncursesw5-dev xz-utils tk-dev
-RUN wget https://www.python.org/ftp/python/3.8.4/Python-3.8.4.tgz
-RUN tar xzf Python-3.8.4.tgz
-RUN cd Python-3.8.4 && ./configure --enable-optimizations && make -j 8 && make altinstall
+ENV PYTHON_VERSION=3.9.9
+RUN wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tgz
+RUN tar xzf Python-$PYTHON_VERSION.tgz
+RUN cd Python-$PYTHON_VERSION && ./configure --enable-optimizations && make -j 8 && make altinstall && cd ..
+RUN rm -rf Python-$PYTHON_VERSION.tgz && rm -rf Python-$PYTHON_VERSION
+RUN python3.9 -m ensurepip --upgrade
 
-RUN apt-get install -y python3-pip
 RUN pip3 install --no-cache-dir py4j pyspark
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+RUN python3.9 -m ensurepip --upgrade
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 
@@ -35,7 +37,7 @@ RUN curl -O https://dist.apache.org/repos/dist/release/hadoop/common/KEYS
 RUN gpg --import KEYS
 
 ENV HADOOP_VERSION 3.2.3
-ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
+ENV HADOOP_URL=https://archive.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
 
 RUN set -x \
     && curl -fSL "$HADOOP_URL" -o /tmp/hadoop.tar.gz \
